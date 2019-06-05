@@ -43,4 +43,5 @@ services:
 
 networks:
   default:
-    name: global
+    external:
+      name: global
