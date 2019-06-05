@@ -44,5 +44,9 @@ PORTAINER_VIRTUAL_HOST=~^portainer\.(vm|vm\d+\.example\.org)$$
 
 ## Documentation
 
-See the [Documentation](docs/index.md) of this Setup System.
+* See the [documentation] of this Setup System.
+* [pluswerk/docker-global](https://github.com/pluswerk/docker-global)
+
+[documentation]: docs/index.md
+
 
