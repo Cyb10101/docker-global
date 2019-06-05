@@ -33,6 +33,7 @@ function startFunction {
     esac
 }
 
+docker network inspect global &>/dev/null || docker network create global
 startFunction "${@:1}"
 exit $?
 

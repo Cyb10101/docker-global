@@ -26,7 +26,7 @@ cd global
 
 ## .env file | Customize
 
-You can create a .env file and overwrite some Settings:
+You can create a `.env` file and overwrite some Settings:
 
 ```bash
 # restart global containers? https://docs.docker.com/compose/compose-file/#restart

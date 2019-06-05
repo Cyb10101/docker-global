@@ -9,7 +9,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./.docker/config/global-nginx-proxy/additional_nginx.conf:/etc/nginx/conf.d/additional_nginx.conf
-      - ./.docker/config/global-nginx-proxy/certs:/etc/nginx/certs:ro
+      - ./.docker/data/global-nginx-proxy/certs:/etc/nginx/certs:ro
 
   global-db:
     image: mysql:5.7
@@ -28,7 +28,7 @@ services:
     ports:
       - "${SMTP_PORT:-1025}:1025"
     environment:
-      - VIRTUAL_HOST=${MAIL_VIRTUAL_HOST:-~^mail\.(vm|vm\d+\.example\.org)$$}
+      - VIRTUAL_HOST=${MAIL_VIRTUAL_HOST:-~^mail\.(vm|vmd|vm\d+\.example\.org)$$}
       - VIRTUAL_PORT=8025
 
   global-portainer:
@@ -38,7 +38,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./.docker/data/global-portainer:/data
     environment:
-      - VIRTUAL_HOST=${PORTAINER_VIRTUAL_HOST:-~^portainer\.(vm|vm\d+\.example\.org)$$}
+      - VIRTUAL_HOST=${PORTAINER_VIRTUAL_HOST:-~^portainer\.(vm|vmd|vm\d+\.example\.org)$$}
     command: --no-auth
 
 networks:
