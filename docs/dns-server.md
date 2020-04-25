@@ -29,17 +29,17 @@ address=/.vm23.example.org/127.0.0.1
 
 Tested on Debian GNU/Linux 9.6 (stretch).
 
-```Shell
+```bash
 sudo apt -y install resolvconf dnsmasq
 sudo sh -c 'echo "address=/.vm/127.0.0.1" >> /etc/NetworkManager/dnsmasq.d/development'
-sudo sh -c 'echo "address=/.vm23.iveins.de/127.0.0.1" >> /etc/NetworkManager/dnsmasq.d/development'
+sudo sh -c 'echo "address=/.vm23.example.org/127.0.0.1" >> /etc/NetworkManager/dnsmasq.d/development'
 sudo systemctl restart dnsmasq
 sudo resolvconf -u
 ```
 
 ### Installation in Ubuntu
 
-Tested on Ubuntu Desktop 16.04 & 18.04.
+Tested on Ubuntu Desktop 20.04.
 
 ```Shell
 sudo apt -y install resolvconf
@@ -55,11 +55,12 @@ dns=dnsmasq
 
 Run these commands in the shell:
 
-```Shell
+```bash
 sudo sh -c 'echo "nameserver 127.0.1.1" >> /etc/resolvconf/resolv.conf.d/head'
 sudo sh -c 'echo "nameserver 8.8.8.8" >> /etc/resolvconf/resolv.conf.d/head'
 sudo sh -c 'echo "address=/.vm/192.168.56.101" >> /etc/NetworkManager/dnsmasq.d/development'
-sudo sh -c 'echo "address=/.vm23.iveins.de/192.168.56.101" >> /etc/NetworkManager/dnsmasq.d/development'
+sudo sh -c 'echo "address=/.vm23.example.org/192.168.56.101" >> /etc/NetworkManager/dnsmasq.d/development'
+sudo sh -c 'echo "address=/.vmd/127.0.0.1" >> /etc/NetworkManager/dnsmasq.d/development'
 sudo systemctl restart network-manager
 sudo resolvconf -u
 ```
