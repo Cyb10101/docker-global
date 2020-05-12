@@ -12,7 +12,7 @@ services:
       - ./.docker/data/global-nginx-proxy/certs:/etc/nginx/certs:ro
 
   global-db:
-    image: mysql:5.7
+    image: mariadb:10.4
     restart: ${RESTART:-always}
     ports:
       - "${DB_PORT:-3306}:3306"
