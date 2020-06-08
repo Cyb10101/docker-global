@@ -29,13 +29,19 @@ cd global
 You can create a `.env` file and overwrite some Settings:
 
 ```bash
-# restart global containers? https://docs.docker.com/compose/compose-file/#restart
+# Restart global containers? https://docs.docker.com/compose/compose-file/#restart
 RESTART=always
-# host ports: You can change the ports without breaking php-dev installations. (maybe if you change 80 or 443)
+
+# Host ports: You can change the ports without breaking php-dev installations. (maybe if you change 80 or 443)
 HTTP_PORT=80
 HTTPS_PORT=443
 DB_PORT=3306
 SMTP_PORT=1025
+
+# IP addresses: Access from all computers instead of just localhost
+HTTP_IP=0.0.0.0
+HTTPS_IP=0.0.0.0
+DB_IP=0.0.0.0
 
 # Overwrite global-mail or global-portainer domain
 MAIL_VIRTUAL_HOST=~^mail\.(vm|vm\d+\.example\.org)$$
@@ -48,5 +54,3 @@ PORTAINER_VIRTUAL_HOST=~^portainer\.(vm|vm\d+\.example\.org)$$
 * [pluswerk/docker-global](https://github.com/pluswerk/docker-global)
 
 [documentation]: docs/index.md
-
-
