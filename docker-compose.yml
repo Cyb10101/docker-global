@@ -6,9 +6,6 @@ services:
     ports:
       - "${HTTP_IP:-127.0.0.1}:${HTTP_PORT:-80}:80"
       - "${HTTPS_IP:-127.0.0.1}:${HTTPS_PORT:-443}:443"
-    environment:
-      # HTTP Strict Transport Security (Only for development)
-      - HSTS=off
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./global-nginx-proxy/additional_nginx.conf:/etc/nginx/conf.d/additional_nginx.conf
