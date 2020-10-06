@@ -20,9 +20,16 @@ Before you start the setup you need to stop all processes what block ports 80, 4
 ```bash
 git clone git@github.com:Cyb10101/docker-global.git global
 cd global
-# always start it with this command(if it is not running already):
+# always start it with this command (if it is not running already):
 ./start.sh start
 ```
+
+Go to your Portainer URL (http://portainer.localhost) and create a user.
+
+Configure Portainer:
+
+* Settings > Authentification > Session lifetime = 1 year
+
 
 ## .env file | Customize
 
@@ -44,8 +51,8 @@ HTTPS_IP=0.0.0.0
 DB_IP=0.0.0.0
 
 # Overwrite global-mail or global-portainer domain
-MAIL_VIRTUAL_HOST=~^mail\.(vm|vm\d+\.example\.org)$$
-PORTAINER_VIRTUAL_HOST=~^portainer\.(vm|vm\d+\.example\.org)$$
+MAIL_VIRTUAL_HOST=~^mail\.(localhost|vm\d+\.example\.org)$$
+PORTAINER_VIRTUAL_HOST=~^portainer\.(localhost|vm\d+\.example\.org)$$
 ```
 
 ## Documentation
