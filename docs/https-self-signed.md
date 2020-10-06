@@ -16,10 +16,10 @@ sudo openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 If you want you can create several certificates.
 The nginx proxy retrieves the information as to what the file should be called from the host name or the specified certificate in the other container.
 
-For example, if the domain name is "chat.example.vm", then these files are searched for one after the other:
+For example, if the domain name is "chat.example.localhost", then these files are searched for one after the other:
 
-* chat.example.vm.crt & chat.example.vm.key
-* example.vm.crt & example.vm.key
+* chat.example.localhost.crt & chat.example.localhost.key
+* example.localhost.crt & example.localhost.key
 * vm.crt & vm.key
 * default.crt & default.key
 
@@ -44,8 +44,8 @@ global-nginx-proxy:
 However, if you have a regular expression in your hostname (VIRTUAL_HOST), it will not work anymore.
 In this case you have to specify the certificate yourself.
 
-* CERT_NAME=chat.example.vm
-* CERT_NAME=example.vm
+* CERT_NAME=chat.example.localhost
+* CERT_NAME=example.localhost
 * CERT_NAME=vm
 * CERT_NAME=default
 
