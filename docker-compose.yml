@@ -1,7 +1,7 @@
-version: '3.5'
+version: "3.8"
 services:
   global-nginx-proxy:
-    image: jwilder/nginx-proxy
+    image: nginxproxy/nginx-proxy
     restart: ${RESTART:-unless-stopped}
     ports:
       - "${HTTP_IP:-127.0.0.1}:${HTTP_PORT:-80}:80"
