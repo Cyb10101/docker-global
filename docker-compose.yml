@@ -13,14 +13,14 @@ services:
       - ./.docker/global-nginx-proxy/dhparam:/etc/nginx/dhparam
 
   global-db:
-    image: mariadb:10.4
+    image: mariadb:10.7
     restart: ${RESTART:-unless-stopped}
     ports:
       - "${DB_IP:-127.0.0.1}:${DB_PORT:-3306}:3306"
     volumes:
       - ./.docker/global-db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - MARIADB_ROOT_PASSWORD=root
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-allowed-packet=16MB --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
 
   global-mail:
