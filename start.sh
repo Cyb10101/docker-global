@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
+set -e; # Exit on error
 
-function startFunction {
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+cd "${SCRIPTPATH}"
+
+startFunction() {
     case ${1} in
         upgrade)
             git fetch && git checkout master && git pull
         ;;
         start)
-            startFunction pull
-            startFunction build
+            startFunction pull && \
+            startFunction build && \
             startFunction up
         ;;
         up)
