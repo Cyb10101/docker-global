@@ -24,8 +24,10 @@ services:
       - MARIADB_ROOT_PASSWORD=root
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-allowed-packet=16MB --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
 
+  # https://mailpit.axllent.org/
   global-mail:
-    image: mailhog/mailhog
+    image: axllent/mailpit
+    #image: mailhog/mailhog
     restart: ${RESTART:-unless-stopped}
     ports:
       - "${SMTP_PORT:-1025}:1025"
@@ -42,6 +44,17 @@ services:
     environment:
       - VIRTUAL_HOST=${PORTAINER_VIRTUAL_HOST:-~^portainer\.(localhost|vm\d+\.example\.org)$$}
       - VIRTUAL_PORT=9000
+
+  # https://dozzle.dev/
+  global-dozzle:
+    image: amir20/dozzle:latest
+    restart: ${RESTART:-unless-stopped}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- ./.docker/global-dozzle:/data
+    environment:
+      - VIRTUAL_HOST=${dozzle_VIRTUAL_HOST:-~^dozzle\.(localhost|vm\d+\.example\.org)$$}
+      - VIRTUAL_PORT=8080
 
 networks:
   default:
