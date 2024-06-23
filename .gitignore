@@ -1,4 +1,3 @@
+/traefik/status-pages/public/*.html
 /.docker
-/.idea
 /.env
-

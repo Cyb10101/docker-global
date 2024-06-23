@@ -2,13 +2,13 @@
 
 You can use DNS Server for the example.localhost domains to work.
 IP address (192.168.56.101) must be adapted for the current environment.
-If you use Docker on the localhost, the IP is ``127.0.0.1`` .
+If you use Docker on the localhost, the IP is `127.0.0.1` .
 
 ## Linux installation
 
 Some information about dnsmasq:
 
-In the file ``/etc/dnsmasq.d/development`` you can add as many addresses as you want.
+In the file `/etc/dnsmasq.d/development` you can add as many addresses as you want.
 
 In the first example, all domains ending with .localhost will be redirected to the IP address 192.168.56.101. (example.localhost, sub2.example.localhost, sub2.sub1.example.localhost, ...)
 
@@ -35,6 +35,49 @@ sudo sh -c 'echo "address=/.localhost/127.0.0.1" >> /etc/NetworkManager/dnsmasq.
 sudo sh -c 'echo "address=/.vm21.example.org/127.0.0.1" >> /etc/NetworkManager/dnsmasq.d/development'
 sudo systemctl restart dnsmasq
 sudo resolvconf -u
+```
+
+### Installation in Ubuntu 22.04
+
+Maybe not needed.
+
+```bash
+sudo gedit /etc/systemd/resolved.conf
+```
+
+Change:
+
+```ini
+[Resolve]
+DNS=192.168.1.1
+Domains=~local ~localhost
+MulticastDNS=yes
+LLMNR=no
+```
+
+```bash
+# Get network interface
+resolvectl status
+
+cat << EOF | sudo tee /etc/systemd/network/enp0s3.network
+[Match]
+Name=enp0s3
+
+[Network]
+DHCP=yes
+MulticastDNS=yes
+LLMNR=no
+EOF
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart systemd-networkd
+sudo systemctl restart systemd-resolved
+
+networkctl list
+# LINK   TYPE  OPERATIONAL SETUP
+# enp0s3 ether routable    configured
 ```
 
 ### Installation in Ubuntu

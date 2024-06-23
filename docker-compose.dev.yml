@@ -1,0 +1,130 @@
+services:
+  # https://doc.traefik.io/traefik/
+  global-traefik:
+    image: traefik:v2.10
+    restart: ${RESTART:-unless-stopped}
+    labels:
+      # If you want to use traefik interface over a domain, enable it
+      - traefik.enable=true
+      - traefik.http.routers.global-traefik.rule=Host(`traefik.localhost`)
+      - traefik.http.services.global-traefik.loadbalancer.server.port=8080
+
+      # TLS
+      - traefik.http.routers.global-traefik.entrypoints=websecure
+      - traefik.http.routers.global-traefik.tls=true
+
+      # Protect the access by a username and a password
+      # htpasswd -nb admin "password" | sed -e s/\\$/\\$\\$/g
+      # docker run --rm httpd:2.4-alpine htpasswd -nbB admin "password" | sed -e s/\\$/\\$\\$/g
+      #- traefik.http.routers.global-traefik.middlewares=auth
+      #- traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$rCspsSTs$$oVNKLMVJIwtuLpYtPuXwt1
+    ports:
+      - "${HTTP_IP:-127.0.0.1}:${HTTP_PORT:-80}:80"
+      - "${HTTPS_IP:-127.0.0.1}:${HTTPS_PORT:-443}:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.dev.yaml:/etc/traefik/traefik.yaml:ro
+      - ./.docker/traefik/acme/:/etc/traefik/acme/
+      - ./.docker/traefik/certs/:/etc/traefik/certs/
+    healthcheck:
+      test: 
+        - CMD
+        - traefik
+        - healthcheck
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - global-serviceError
+
+  global-serviceError:
+    image: httpd:alpine
+    restart: always
+    hostname: status
+    container_name: global-serviceError
+    volumes:
+      - ./traefik/status-pages/public:/usr/local/apache2/htdocs
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.status-pages.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.status-pages.priority=1
+      #- traefik.http.routers.status-pages.entrypoints=web
+      - traefik.http.routers.status-pages.middlewares=status-pages@file
+
+      # TLS
+      - traefik.http.routers.status-pages.entrypoints=websecure
+      - traefik.http.routers.status-pages.tls=true
+      #- traefik.http.routers.status-pages.tls.certresolver=letsEncrypt
+
+  global-db:
+    image: mariadb:10.11
+    restart: ${RESTART:-unless-stopped}
+    ports:
+      - "${DB_IP:-127.0.0.1}:${DB_PORT:-3306}:3306"
+    volumes:
+      - ./.docker/global-db:/var/lib/mysql
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_AUTO_UPGRADE=1
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-allowed-packet=16MB --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+
+  # https://mailpit.axllent.org/
+  global-mail:
+    image: axllent/mailpit
+    restart: ${RESTART:-unless-stopped}
+    ports:
+      - "${SMTP_PORT:-1025}:1025"
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.global-mail.rule=Host(`mail.localhost`)"
+      - traefik.http.services.global-mail.loadbalancer.server.port=8025
+
+      # TLS
+      - traefik.http.routers.global-mail.entrypoints=websecure
+      - traefik.http.routers.global-mail.tls=true
+    depends_on:
+      global-traefik:
+        condition: service_healthy
+
+  # https://www.portainer.io/
+  global-portainer:
+    image: portainer/portainer-ce
+    restart: ${RESTART:-unless-stopped}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./.docker/global-portainer:/data
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.global-portainer.rule=Host(`portainer.localhost`)"
+      - traefik.http.services.global-portainer.loadbalancer.server.port=9000
+
+      # TLS
+      - traefik.http.routers.global-portainer.entrypoints=websecure
+      - traefik.http.routers.global-portainer.tls=true
+    depends_on:
+      global-traefik:
+        condition: service_healthy
+
+  # https://dozzle.dev/
+  global-dozzle:
+    image: amir20/dozzle:latest
+    restart: ${RESTART:-unless-stopped}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      #- ./.docker/global-dozzle:/data
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.global-dozzle.rule=Host(`dozzle.localhost`)"
+      - traefik.http.services.global-dozzle.loadbalancer.server.port=8080
+
+      # TLS
+      - traefik.http.routers.global-dozzle.entrypoints=websecure
+      - traefik.http.routers.global-dozzle.tls=true
+    depends_on:
+      global-traefik:
+        condition: service_healthy
+
+networks:
+  default:
+    external: true
+    name: global

@@ -1,0 +1,31 @@
+services:
+  whoami:
+    image: traefik/whoami
+    #hostname: whoami
+    labels:
+      - traefik.enable=true
+      #- "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      #- "traefik.http.routers.whoami.rule=Host(`whoami.localhost`, `www.whoami.localhost`)"
+      - traefik.http.routers.whoami.rule=(Host(`whoami.localhost`) || Host(`www.whoami.localhost`))
+      #- traefik.http.routers.whoami.rule=(HostRegexp(`whoami.localhost`, `{subdomain:.+}.whoami.localhost`) || Host(`192.168.178.21`))
+      #- traefik.http.services.whoami.loadbalancer.server.port=8080
+      - traefik.http.routers.whoami.middlewares=redirect-www@file
+      #- traefik.http.routers.whoami.middlewares=whoami-alternative_www,redirect-www@file
+
+      # TLS
+      - traefik.http.routers.whoami.entrypoints=websecure
+      - traefik.http.routers.whoami.tls=true
+      #- traefik.http.routers.whoami.tls.certresolver=letsEncrypt
+
+      # Middelware: Redirect alternative domain to main domain
+      #- "traefik.http.middlewares.whoami-alternative_www.redirectregex.regex=^(https?)://(www\\.)?whoami-alternative\\.localhost/(.*)"
+      #- "traefik.http.middlewares.whoami-alternative_www.redirectregex.replacement=$${1}://whoami.localhost/$${3}"
+      #- "traefik.http.middlewares.whoami-alternative_www.redirectregex.permanent=true"
+    deploy:
+      replicas: 2
+
+networks:
+  default:
+    external: true
+    name: global
+

@@ -1,0 +1,121 @@
+### STATIC CONFIG ### (Restart traefik to update)
+
+# Shows you a log msg if a newer image tag can be used
+global:
+  checkNewVersion: true
+
+# Log default is ERROR, but WARN is more helpful
+log:
+#  level: ERROR
+  level: WARN
+#  level: INFO
+#  level: DEBUG
+
+# Enable dashboard on 8080 with NO AUTH
+api:
+  #insecure: false
+  insecure: true
+  #dashboard: false
+  dashboard: true
+
+# Enable ping so the `traefik healthcheck` works
+ping: {}
+
+# Auto-proxy containers if they have proper labels and also use this file for dynamic config (tls)
+providers:
+  docker:
+    exposedByDefault: false
+    watch: true
+  file:
+    fileName: /etc/traefik/traefik.yaml
+    watch: true
+
+# Listen on 80/443 and redirect all 80 to 443 via 301
+entryPoints:
+  web:
+    address: :80
+    # Comment out these lins if you don't want to redirect everything
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: :443
+
+### DYNAMIC CONFIG ###
+http:
+  middlewares:
+    # Redirect www.example.com to example.com
+    redirect-www:
+      RedirectRegex:
+        regex: ^(https?):\/\/www\.([^\.]+)\.([^\/]+)\/(.*)
+        replacement: "${1}://${2}.${3}/${4}"
+        permanent: true
+
+    # Status pages (Error pages)
+    status-pages:
+      errors:
+        status: 404,500-599
+        service: global-serviceError-global@docker
+        #query: /{status}.html
+        query: /index.html
+
+    # Enable cors
+    #cors:
+    #  headers:
+    #    accessControlAllowHeaders: "*"
+    #    accessControlAllowMethods: "*"
+    #    #accessControlAllowOriginList: https://api.spotify.com,https://example.com
+    #    #accessControlAllowOriginList: https://api.spotify.com
+    #    accessControlAllowOriginList: "*"
+    #    #accessControlAllowCredentials: true
+    #    accessControlMaxAge: 100
+    #    addVaryHeader: true
+
+tls:
+  certificates:
+    - certFile: /etc/traefik/certs/default.crt
+      keyFile: /etc/traefik/certs/default.key
+#      stores:
+#        - default
+# When troubleshooting certs, enable this so traefik doesn't use its own self-signed.
+# By default if it can't find a matching cert, it'll just create its own which will cause
+# cert warnings in browser and can be confusing to troubleshoot
+#  options:
+#    default:
+#      sniStrict: true
+      
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/certs/default.crt
+        keyFile: /etc/traefik/certs/default.key
+#      defaultGeneratedCert:
+#        resolver: myresolver
+#        domain:
+#          main: traefik.localhost
+          #sans:
+          #  - foo.example.org
+          #  - bar.example.org
+
+certificatesResolvers:
+  letsEncrypt:
+    # Enable ACME (Let's Encrypt): automatic SSL.
+    acme:
+      email: "username@example.org"
+      storage: "/etc/traefik/acme/acme.json"
+
+      # Use a TLS-ALPN-01 ACME challenge.
+      # Optional (but recommended)
+      tlsChallenge: {}
+
+      # Use a HTTP-01 ACME challenge.
+      # Optional
+      httpChallenge:
+
+        # EntryPoint to use for the HTTP-01 challenges.
+        # Required
+        entryPoint: web
+

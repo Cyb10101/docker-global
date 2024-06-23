@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Error page</title>
+
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css2?family=Red+Hat+Display:wght@500&family=Fira+Mono&family=Ubuntu&display=swap" rel="stylesheet"/>
+<style>
+/** Idea author: https://github.com/186526/CloudflareCustomErrorPage */
+:root {
+    --color-bg-primary: #fff;
+    --color-text-primary: #000;
+    --color-text-secondary: #575958;
+    --font-size-primary: 56px;
+    --font-size-secondary: 20px;
+    --ui-card-color-bg: #f2f2f2;
+    --color-text-ok: #137333;
+    --color-bg-ok: #e6f4ea;
+    --color-text-error: #c5221f;
+    --color-bg-error: #fce8e6;
+    --color-text-warning: #b05a00;
+    --color-bg-warning: #fef7e0;
+    --icon-size: 48px;
+}
+@media (prefers-color-scheme:dark) {
+    :root {
+        --color-bg-primary: #111;
+        --color-text-primary: rgba(255, 255, 255, 0.86);
+        --color-text-secondary: rgba(255, 255, 255, 0.4);
+        --ui-card-color-bg: rgba(40, 40, 40, 0.73);
+        --color-bg-ok: #07220f;
+        --color-bg-error: #270501;
+        --color-bg-warning: #392605;
+    }
+}
+
+html {
+    height: 100%;
+}
+body {
+    min-height: 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.page {
+    width: 100%;
+    padding: 2rem 2rem;
+}
+
+body {
+    font-family: 'Red Hat Display', Ubuntu, Roboto, 'Noto Sans SC', sans-serif;
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+}
+header {
+    margin-left: 1rem;
+}
+header .error-code {
+    font-size: var(--font-size-primary);
+    line-height: var(--font-size-primary);
+    font-family: 'Fira Mono', Ubuntu, monospace;
+    font-weight: 400;
+    margin: 0 0 0 10px;
+}
+header .error-description {
+    font-family: Ubuntu, Roboto, 'Noto Sans SC', sans-serif;
+    font-size: var(--font-size-secondary);
+    color: var(--color-text-secondary);
+    margin: 0 0 0 10px;
+}
+code {
+    font-family: 'Fira Mono', monospace;
+}
+.status {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.card {
+    background-color: var(--ui-card-color-bg);
+    padding: 2rem;
+    margin: 1rem 1rem;
+    min-height: 3rem;
+    border-radius: 9px;
+    flex-grow: 1;
+}
+
+.arrows {
+    display: none;
+}
+.arrows svg {
+    fill: var(--color-text-secondary);
+}
+.icon svg {
+    width: var(--icon-size);
+    height: auto;
+    fill: var(--color-text-primary);
+}
+.card.ok {
+    background-color: var(--color-bg-ok);
+}
+.card.ok .status-text {
+    color: var(--color-text-ok);
+}
+.card.ok svg {
+    fill: var(--color-text-ok);
+}
+.card.error {
+    background-color: var(--color-bg-error);
+}
+.card.error .status-text {
+    color: var(--color-text-error);
+}
+.card.error svg {
+    fill: var(--color-text-error);
+}
+.card.warning {
+    background-color: var(--color-bg-warning);
+}
+.card.warning .status-text {
+    color: var(--color-text-warning);
+}
+.card.warning svg {
+    fill: var(--color-text-warning);
+}
+.card main {
+    font-size: calc(var(--font-size-secondary) + .1rem);
+}
+.card .status-text,
+.reason p {
+    margin: 0;
+    font-family: Ubuntu, Roboto, Noto Sans SC, sans-serif;
+}
+.reason p {
+    line-height: 125%;
+}
+a {
+    text-decoration: none;
+    color: #1967d2;
+}
+.reason {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.reason>* {
+    display: block;
+    margin: 1rem;
+    flex-grow: 1;
+    max-width: 40%;
+}
+.reason h2 {
+    font-size: calc(var(--font-size-secondary) + .2rem);
+    margin: 0 0 .6em 0;
+    font-weight: 550;
+}
+footer {
+    margin: 1rem;
+    color: var(--color-text-secondary);
+    font-size: 0;
+}
+
+footer .details {
+    margin-top: 20px;
+}
+footer .details ul {
+    padding: 0;
+}
+footer .details code,footer .details span {
+    font-size: calc(var(--font-size-secondary) - .6rem);
+}
+footer .details code {
+    padding-left: 7px;
+}
+
+@media screen and (max-width: 480px) {
+    .reason > * {
+        max-width: 100%;
+    }
+    footer .details code,footer .details span {
+        font-size: calc(var(--font-size-secondary) - .3rem);
+    }
+}
+
+/** Bootstrap breakpoints */
+/*@media screen and (min-width: 576px) {
+}*/
+
+@media screen and (min-width: 768px) {
+    .page {
+        width: 85%;
+    }
+    header > * {
+        display: inline-block;
+        margin-left: 1%;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .arrows {
+        display: block;
+    }
+}
+
+/*@media screen and (min-width: 1200px) {
+}
+
+@media screen and (min-width: 1400px) {
+}*/
+</style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <h1 class="error-code"></h1>
+        <p class="error-description"></p>
+    </header>
+    <div class="status">
+        <div class="card warning" id="client-status-card">
+            <i class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                    <path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 14H5V8h14v10z"/>
+                </svg>
+            </i>
+            <main data-l10n>Your Client</main>
+            <p class="status-text" data-l10n>Unknown</p>
+        </div>
+
+        <div class="arrows">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" fill="#000000">
+                <defs>
+                    <symbol id="arrows-horizontal" viewBox="0 0 24 24">
+                        <rect fill="none" height="24" width="24" x="0"/>
+                        <polygon points="7.41,13.41 6,12 2,16 6,20 7.41,18.59 5.83,17 21,17 21,15 5.83,15"/>
+                        <polygon points="16.59,10.59 18,12 22,8 18,4 16.59,5.41 18.17,7 3,7 3,9 18.17,9"/>
+                    </symbol>
+                </defs>
+                <use href="#arrows-horizontal"/>
+            </svg>
+        </div>
+
+        <div class="card ok" id="network-status-card">
+            <i class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                    <path d="M12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6m0-2C9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96C18.67 6.59 15.64 4 12 4z"/>
+                </svg>
+            </i>
+            <main data-l10n>Network</main>
+            <p class="status-text" data-l10n>Working</p>
+        </div>
+
+        <div class="arrows">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" width="24px" fill="#000000">
+                <use href="#arrows-horizontal" />
+            </svg>
+        </div>
+
+        <div class="card warning" id="server-status-card">
+            <i class="icon">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                    <path d="M19 15v4H5v-4h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 18.5c-.82 0-1.5-.67-1.5-1.5s.68-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM19 5v4H5V5h14m1-2H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 8.5c-.82 0-1.5-.67-1.5-1.5S6.18 5.5 7 5.5s1.5.68 1.5 1.5S7.83 8.5 7 8.5z"/>
+                </svg>
+            </i>
+            <main data-l10n>Web Server</main>
+            <p class="status-text" data-l10n>Unknown</p>
+        </div>
+    </div>
+    <div class="reason">
+        <div id="what-happened">
+            <h2 data-l10n>What happened?</h2>
+            <p class="description" data-l10n>Unknown http status code was sent.</p>
+        </div>
+        <div id="what-can-i-do">
+            <h2 data-l10n>What can I do?</h2>
+            <p class="description" data-l10n>Please try again in a few minutes.</p>
+        </div>
+    </div>
+    <footer>
+        <div class="details">
+            <ul>
+                <li><span><span data-l10n>Host</span>:</span> <code id="host"></code></li>
+                <li><span><span data-l10n>Original URI</span>:</span> <code id="originalUri"></code></li>
+                <li><span><span data-l10n>Time</span>:</span> <code id="time"></code></li>
+                <li><span><span data-l10n>Timestamp</span>:</span> <code id="timestamp"></code></li>
+            </ul>
+        </div>
+    </footer>
+</div>
+
+<script>
+function getFullDate(date) {
+  return date.getFullYear() + '-' + (((date.getMonth() + 1) < 10) ? '0' : '') + (date.getMonth() + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate();
+}
+function getFullTime(date) {
+  return (date.getHours() < 10 ? '0' : '') + date.getHours() + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes() + ':' + (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+}
+
+class HttpStatusCodes {
+    static codes = {
+        400: {
+            message: 'Bad Request',
+            description: 'The server cannot process the request because it is malformed or contains invalid syntax.'
+        },
+        401: {
+            message: 'Unauthorized',
+            description: 'The request requires user authentication. The client must provide valid credentials to access the requested resource.'
+        },
+        402: {
+            message: 'Payment Required',
+            description: 'This status code is reserved for future use and is not currently supported.'
+        },
+        403: {
+            message: 'Forbidden',
+            description: 'The server understood the request, but the client does not have the necessary permissions to access the requested resource.'
+        },
+        404: {
+            message: 'Not Found',
+            description: 'The server could not find the requested resource. This is commonly used when the requested URL is not found on the server.'
+        },
+        405: {
+            message: 'Method Not Allowed',
+            description: 'The method specified in the request is not allowed for the resource identified by the request URI.'
+        },
+        406: {
+            message: 'Not Acceptable',
+            description: 'The server cannot produce a response matching the list of acceptable values defined in the request\'s headers.'
+        },
+        407: {
+            message: 'Proxy Authentication Required',
+            description: 'The client must first authenticate itself with the proxy before making a request to the requested resource.'
+        },
+        408: {
+            message: 'Request Timeout',
+            description: 'The server timed out waiting for the request. The client should repeat the request if it wishes to continue.'
+        },
+        409: {
+            message: 'Conflict',
+            description: 'The request could not be completed due to a conflict with the current state of the target resource.'
+        },
+        410: {
+            message: 'Gone',
+            description: 'The requested resource is no longer available, and no forwarding address is known.'
+        },
+        411: {
+            message: 'Length Required',
+            description: 'The server requires a content length to be specified in the request headers, and the client did not provide it.'
+        },
+        412: {
+            message: 'Precondition Failed',
+            description: 'One or more conditions specified in the request headers failed validation.'
+        },
+        413: {
+            message: 'Payload Too Large',
+            description: 'The server refused to process the request because the payload is too large for it to handle.'
+        },
+        414: {
+            message: 'URI Too Long',
+            description: 'The server refused to process the request because the URI is too long.'
+        },
+        415: {
+            message: 'Unsupported Media Type',
+            description: 'The server does not support the media type that is specified in the request headers.'
+        },
+        416: {
+            message: 'Range Not Satisfiable',
+            description: 'The requested range cannot be satisfied, either because it is outside the range of the target resource or it is not feasible for the server to fulfill.'
+        },
+        417: {
+            message: 'Expectation Failed',
+            description: 'The server cannot meet the requirements specified in the Expect request header.'
+        },
+        418: {
+            message: 'I\'m a teapot',
+            description: 'This code was defined in 1998 as an April Fools\' Day joke. It is not expected to be implemented by actual HTTP servers.'
+        },
+        421: {
+            message: 'Misdirected Request',
+            description: 'The request was directed at a server that is not able to produce a response.'
+        },
+        422: {
+            message: 'Unprocessable Content',
+            description: 'The server understands the content type of the request entity but was unable to process the contained instructions.'
+        },
+        423: {
+            message: 'Locked',
+            description: 'The requested resource is currently locked, and the client should try again later.'
+        },
+        424: {
+            message: 'Failed Dependency',
+            description: 'The request failed due to a failure of a previous request.'
+        },
+        425: {
+            message: 'Too Early',
+            description: 'The server is unwilling to risk processing a request that might be replayed.'
+        },
+        426: {
+            message: 'Upgrade Required',
+            description: 'The server refuses to perform the request using the current protocol but might be willing to do so after the client upgrades to a different protocol.'
+        },
+        428: {
+            message: 'Precondition Required',
+            description: 'The server requires the request to be conditional, based on the presence of specific headers in the request.'
+        },
+        429: {
+            message: 'Too Many Requests',
+            description: 'The client has sent too many requests to the server in a given amount of time.'
+        },
+        431: {
+            message: 'Request Header Fields Too Large',
+            description: 'The server is unwilling to process the request because the size of the request headers is too large.'
+        },
+        451: {
+            message: 'Unavailable For Legal Reasons',
+            description: 'The server is denying access to the resource as a consequence of a legal demand.'
+        },
+        500: {
+            message: 'Internal Server Error',
+            description: 'The server encountered an unexpected condition that prevented it from fulfilling the request.'
+        },
+        501: {
+            message: 'Not Implemented',
+            description: 'The server does not support the functionality required to fulfill the request. This is typically a problem with the server\'s configuration.'
+        },
+        502: {
+            message: 'Bad Gateway',
+            description: 'The server, while acting as a gateway or proxy, received an invalid response from an upstream server it accessed in attempting to fulfill the request.'
+        },
+        503: {
+            message: 'Service Unavailable',
+            description: 'The server is currently unable to handle the request due to temporary overloading or maintenance of the server. It is a temporary condition.'
+        },
+        504: {
+            message: 'Gateway Timeout',
+            description: 'The server, while acting as a gateway or proxy, did not receive a timely response from the upstream server or some other auxiliary server.'
+        },
+        505: {
+            message: 'HTTP Version Not Supported',
+            description: 'The server does not support, or refuses to support, the major version of HTTP that was used in the request message.'
+        },
+        506: {
+            message: 'Variant Also Negotiates',
+            description: 'The server has an internal configuration error: The chosen variant resource is configured to engage in transparent content negotiation itself, and is therefore not a proper end point in the negotiation process.'
+        },
+        507: {
+            message: 'Insufficient Storage',
+            description: 'The server is unable to store the representation needed to complete the request. This is typically a result of the server being overloaded or reaching storage limits.'
+        },
+        508: {
+            message: 'Loop Detected',
+            description: 'The server detected an infinite loop while processing a request.'
+        },
+        510: {
+            message: 'Not Extended',
+            description: 'Further extensions to the request are required for the server to fulfill it.'
+        },
+        511: {
+            message: 'Network Authentication Required',
+            description: 'The client needs to authenticate to gain network access. Intended for use by intercepting proxies used to control access to the network.'
+        }
+    };
+
+    static getByCode(code) {
+        return this.codes.hasOwnProperty(code) ? this.codes[code] : null;
+    }
+}
+
+class ErrorStateClass {
+    static isOk = 'ok';
+    static isWarning = 'warning';
+    static isError = 'error';
+}
+
+class ErrorPage {
+    constructor(code, l10n) {
+        let errorCode = parseInt(code, 10);
+        if (typeof errorCode === 'undefined' || isNaN(errorCode)) {
+            console.warn('Cannot parse the error code:', code);
+            errorCode = 0;
+        }
+
+        const statusCode = HttpStatusCodes.getByCode(errorCode);
+        const message = statusCode ? statusCode.message : 'Unknown';
+        const description = statusCode ? statusCode.description : 'Unknown http status code was sent';
+
+        document.title = `${errorCode} | ${l10n.translate(message)}`;
+        this.setTextByClassName('error-code', errorCode);
+        this.setErrorDescription(code, message);
+        document.getElementById('host').innerText = location.host;
+        document.getElementById('originalUri').innerText = location.href;
+        document.getElementById('time').innerText = getFullDate(new Date) + ' ' + getFullTime(new Date);
+        document.getElementById('timestamp').innerText = Date.now();
+
+        const cards = {
+            client: document.getElementById('client-status-card'),
+            network: document.getElementById('network-status-card'),
+            server: document.getElementById('server-status-card'),
+        };
+
+        if (errorCode >= 400 && errorCode <= 499) {
+            this.setCardState(cards.client, ErrorStateClass.isError, message)
+            this.setCardState(cards.network, ErrorStateClass.isOk)
+            this.setCardState(cards.server, ErrorStateClass.isOk)
+        } else if (errorCode >= 500 && errorCode <= 599) {
+            this.setCardState(cards.client, ErrorStateClass.isOk)
+            this.setCardState(cards.network, ErrorStateClass.isOk)
+            this.setCardState(cards.server, ErrorStateClass.isError, message)
+        } else {
+            this.setCardState(cards.client, ErrorStateClass.isWarning, 'Unknown')
+            this.setCardState(cards.network, ErrorStateClass.isOk)
+            this.setCardState(cards.server, ErrorStateClass.isWarning, 'Unknown')
+        }
+
+        this.setReasons(errorCode, description);
+    }
+
+    getWhatToDoMessage(errorCode) {
+        switch (errorCode) {
+            case 400: case 405: case 406: case 411: case 413: case 416: case 417: case 421: case 422: case 426: case 428: case 431:
+                return 'Please try to change the request method, headers, payload, or URL.'; break;
+            case 401: case 403: case 407:
+                return 'Please check your authorization data.'; break;
+            case 404:
+                return 'Please double-check the URL and try again.'; break;
+            case 402: case 409: case 410: case 412: case 413: case 414: case 415: case 418: case 423: case 451:
+                return '¯\\_(ツ)_/¯'; break;
+            default:
+                return 'Please try again in a few minutes.';
+        }
+    }
+
+    setCardState(card, state, statusText = '') {
+        const okClass = 'ok', warnClass = 'warning', errClass = 'error';
+
+        card.classList.remove(okClass, errClass, warnClass);
+        card.querySelectorAll('.status-text').forEach(($statusText) => {
+            $statusText.innerText = state === ErrorStateClass.isOk ? 'Working' : statusText;
+        });
+
+        if (state === ErrorStateClass.isOk) {
+            card.classList.add(okClass);
+        } else if (state === ErrorStateClass.isWarning) {
+            card.classList.add(warnClass);
+        } else if (state === ErrorStateClass.isError) {
+            card.classList.add(errClass);
+        }
+    }
+
+    setReasons(errorCode, whatHappened) {
+        const whatToDo = this.getWhatToDoMessage(errorCode);
+
+        const elementWhatHappened = document.getElementById('what-happened');
+        if (typeof whatHappened === 'string' && whatHappened.length > 0) {
+            elementWhatHappened.querySelector('.description').innerText = whatHappened;
+        } else {
+            elementWhatHappened.remove();
+        }
+
+        const elementWhatToDo = document.getElementById('what-can-i-do');
+        if (typeof whatToDo === 'string' && whatToDo.length > 0) {
+            elementWhatToDo.querySelector('.description').innerText = whatToDo;
+        } else {
+            elementWhatToDo.remove();
+        }
+    }
+
+    setErrorDescription(errorCode, message) {
+        message = `<span data-l10n>${message}</span>`;
+        if (errorCode >= 400 && errorCode <= 499) {
+            message += ' (<span data-l10n>Client-side error</span>)';
+        } else if (errorCode >= 500 && errorCode <= 599) {
+            message += ' (<span data-l10n>Server-side error</span>)';
+        }
+
+        for (const element of document.getElementsByClassName('error-description')) {
+            element.innerHTML = message;
+        }
+    }
+
+    setTextByClassName(className, text) {
+        for (const element of document.getElementsByClassName(className)) {
+            element.innerHTML = text;
+        }
+    }
+}
+
+// Language codes list: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+const httpStatusCodeTranslation = {
+    // 400
+    'Bad Request': {
+        de: 'Schlechte Anfrage'
+    },
+    'The server cannot process the request because it is malformed or contains invalid syntax.': {
+        de: 'Der Server kann die Anfrage nicht verarbeiten, da sie fehlerhaft ist oder eine ungültige Syntax enthält.'
+    },
+    // 401
+    'Unauthorized': {
+        de: 'Unerlaubt'
+    },
+    'The request requires user authentication. The client must provide valid credentials to access the requested resource.': {
+        de: 'Die Anfrage erfordert eine Benutzerauthentifizierung. Der Client muss gültige Anmeldedaten angeben, um auf die angeforderte Ressource zugreifen zu können.'
+    },
+    // 402
+    'Payment Required': {
+        de: 'Zahlung erforderlich'
+    },
+    'This status code is reserved for future use and is not currently supported.': {
+        de: 'Dieser Statuscode ist für die zukünftige Verwendung reserviert und wird derzeit nicht unterstützt.'
+    },
+    // 403
+    'Forbidden': {
+        de: 'Verboten'
+    },
+    'The server understood the request, but the client does not have the necessary permissions to access the requested resource.': {
+        de: 'Der Server hat die Anfrage verstanden, aber der Client verfügt nicht über die erforderlichen Berechtigungen für den Zugriff auf die angeforderte Ressource.'
+    },
+    // 404
+    'Not Found': {
+        de: 'Nicht gefunden'
+    },
+    'The server could not find the requested resource. This is commonly used when the requested URL is not found on the server.': {
+        de: 'Der Server konnte die angeforderte Ressource nicht finden. Dies wird üblicherweise verwendet, wenn die angeforderte URL auf dem Server nicht gefunden wird.'
+    },
+    // 405
+    'Method Not Allowed': {
+        de: 'Methode nicht erlaubt'
+    },
+    'The method specified in the request is not allowed for the resource identified by the request URI.': {
+        de: 'Die in der Anfrage angegebene Methode ist für die durch den Anfrage-URI identifizierte Ressource nicht zulässig.'
+    },
+    // 406
+    'Not Acceptable': {
+        de: 'Nicht akzeptabel'
+    },
+    'The server cannot produce a response matching the list of acceptable values defined in the request\'s headers.': {
+        de: 'Der Server kann keine Antwort erzeugen, die der Liste der akzeptablen Werte entspricht, die in den Kopfzeilen der Anfrage definiert sind.'
+    },
+    // 407
+    'Proxy Authentication Required': {
+        de: 'Proxy-Authentifizierung erforderlich'
+    },
+    'The client must first authenticate itself with the proxy before making a request to the requested resource.': {
+        de: 'Der Client muss sich zuerst beim Proxy authentifizieren, bevor er eine Anfrage an die angeforderte Ressource stellt.'
+    },
+    // 408
+    'Request Timeout': {
+        de: 'Zeitüberschreitung der Anfrage'
+    },
+    'The server timed out waiting for the request. The client should repeat the request if it wishes to continue.': {
+        de: 'Der Server hat eine Zeitüberschreitung beim Warten auf die Anfrage. Der Client sollte die Anfrage wiederholen, wenn er sie fortsetzen möchte.'
+    },
+    // 409
+    'Conflict': {
+        de: 'Konflikt'
+    },
+    'The request could not be completed due to a conflict with the current state of the target resource.': {
+        de: 'Die Anfrage konnte aufgrund eines Konflikts mit dem aktuellen Zustand der Zielressource nicht abgeschlossen werden.'
+    },
+    // 410
+    'Gone': {
+        de: 'Weg'
+    },
+    'The requested resource is no longer available, and no forwarding address is known.': {
+        de: 'Die angeforderte Ressource ist nicht mehr verfügbar, und es ist keine Weiterleitungsadresse bekannt.'
+    },
+    // 411
+    'Length Required': {
+        de: 'Länge erforderlich'
+    },
+    'The server requires a content length to be specified in the request headers, and the client did not provide it.': {
+        de: 'Der Server verlangt die Angabe einer Inhaltslänge in den Headern der Anfrage, die der Client nicht angegeben hat.'
+    },
+    // 412
+    'Precondition Failed': {
+        de: 'Vorbedingung fehlgeschlagen'
+    },
+    'One or more conditions specified in the request headers failed validation.': {
+        de: 'Eine oder mehrere Bedingungen, die in den Kopfzeilen der Anfrage angegeben wurden, konnten nicht validiert werden.'
+    },
+    // 413
+    'Payload Too Large': {
+        de: 'Payload zu groß'
+    },
+    'The server refused to process the request because the payload is too large for it to handle.': {
+        de: 'Der Server hat sich geweigert, die Anfrage zu bearbeiten, weil die Nutzlast zu groß ist.'
+    },
+    // 414
+    'URI Too Long': {
+        de: 'URI zu lang'
+    },
+    'The server refused to process the request because the URI is too long.': {
+        de: 'Der Server hat sich geweigert, die Anforderung zu verarbeiten, weil der URI zu lang ist.'
+    },
+    // 415
+    'Unsupported Media Type': {
+        de: 'Nicht unterstützter Medientyp'
+    },
+    'The server does not support the media type that is specified in the request headers.': {
+        de: 'Der Server unterstützt nicht den Medientyp, der in den Kopfzeilen der Anforderung angegeben ist.'
+    },
+    // 416
+    'Range Not Satisfiable': {
+        de: 'Bereich nicht zufriedenstellend'
+    },
+    'The requested range cannot be satisfied, either because it is outside the range of the target resource or it is not feasible for the server to fulfill.': {
+        de: 'Der angeforderte Bereich kann nicht erfüllt werden, da er entweder außerhalb des Bereichs der Zielressource liegt oder für den Server nicht realisierbar ist.'
+    },
+    // 417
+    'Expectation Failed': {
+        de: 'Erwartung fehlgeschlagen'
+    },
+    'The server cannot meet the requirements specified in the Expect request header.': {
+        de: 'Der Server kann die in der Kopfzeile der Expect-Anforderung angegebenen Anforderungen nicht erfüllen.'
+    },
+    // 418
+    'I\'m a teapot': {
+        de: 'Ich bin eine Teekanne'
+    },
+    'This code was defined in 1998 as an April Fools\' Day joke. It is not expected to be implemented by actual HTTP servers.': {
+        de: 'Dieser Code wurde 1998 als Aprilscherz definiert. Es ist nicht zu erwarten, dass er von tatsächlichen HTTP-Servern implementiert wird.'
+    },
+    // 421
+    'Misdirected Request': {
+        de: 'Fehlgeleitete Anfrage'
+    },
+    'The request was directed at a server that is not able to produce a response.': {
+        de: 'Die Anfrage wurde an einen Server gerichtet, der nicht in der Lage ist, eine Antwort zu liefern.'
+    },
+    // 422
+    'Unprocessable Content': {
+        de: 'Unverarbeitbarer Inhalt'
+    },
+    'The server understands the content type of the request entity but was unable to process the contained instructions.': {
+        de: 'Der Server versteht den Inhaltstyp der angeforderten Entität, war aber nicht in der Lage, die enthaltenen Anweisungen zu verarbeiten.'
+    },
+    // 423
+    'Locked': {
+        de: 'Gesperrt'
+    },
+    'The requested resource is currently locked, and the client should try again later.': {
+        de: 'Die angeforderte Ressource ist derzeit gesperrt, und der Client sollte es später erneut versuchen.'
+    },
+    // 424
+    'Failed Dependency': {
+        de: 'Fehlgeschlagene Dependenz'
+    },
+    'The request failed due to a failure of a previous request.': {
+        de: 'Die Anfrage schlug aufgrund eines Fehlers bei einer früheren Anfrage fehl.'
+    },
+    // 425
+    'Too Early': {
+        de: 'Zu früh'
+    },
+    'The server is unwilling to risk processing a request that might be replayed.': {
+        de: 'Der Server ist nicht gewillt, das Risiko einzugehen, eine Anfrage zu bearbeiten, die möglicherweise wiederholt wird.'
+    },
+    // 426
+    'Upgrade Required': {
+        de: 'Upgrade erforderlich'
+    },
+    'The server refuses to perform the request using the current protocol but might be willing to do so after the client upgrades to a different protocol.': {
+        de: 'Der Server weigert sich, die Anfrage mit dem aktuellen Protokoll zu bearbeiten, ist aber möglicherweise bereit, dies zu tun, nachdem der Client auf ein anderes Protokoll umgestiegen ist.'
+    },
+    // 428
+    'Precondition Required': {
+        de: 'Vorbedingung erforderlich'
+    },
+    'The server requires the request to be conditional, based on the presence of specific headers in the request.': {
+        de: 'Der Server verlangt eine bedingte Anfrage, die auf dem Vorhandensein bestimmter Header in der Anfrage basiert.'
+    },
+    // 429
+    'Too Many Requests': {
+        de: 'Zu viele Requests'
+    },
+    'The client has sent too many requests to the server in a given amount of time.': {
+        de: 'Der Client hat in einer bestimmten Zeitspanne zu viele Anfragen an den Server gesendet.'
+    },
+    // 431
+    'Request Header Fields Too Large': {
+        de: 'Request Header Felder zu groß'
+    },
+    'The server is unwilling to process the request because the size of the request headers is too large.': {
+        de: 'Der Server ist nicht bereit, die Anfrage zu bearbeiten, weil die Größe der Anfrage-Header zu groß ist.'
+    },
+    // 451
+    'Unavailable For Legal Reasons': {
+        de: 'Aus rechtlichen Gründen nicht verfügbar'
+    },
+    'The server is denying access to the resource as a consequence of a legal demand.': {
+        de: 'Der Server verweigert den Zugriff auf die Ressource aufgrund einer gesetzlichen Forderung.'
+    },
+    // 500
+    'Internal Server Error': {
+        de: 'Interner Serverfehler'
+    },
+    'The server encountered an unexpected condition that prevented it from fulfilling the request.': {
+        de: 'Der Server ist auf eine unerwartete Bedingung gestoßen, die ihn daran hindert, die Anfrage zu erfüllen.'
+    },
+    // 501
+    'Not Implemented': {
+        de: 'Nicht implementiert'
+    },
+    'The server does not support the functionality required to fulfill the request. This is typically a problem with the server\'s configuration.': {
+        de: 'Der Server unterstützt die zur Erfüllung der Anfrage erforderliche Funktionalität nicht. Dies ist in der Regel ein Problem mit der Konfiguration des Servers.'
+    },
+    // 502
+    'Bad Gateway': {
+        de: 'Schlechtes Gateway'
+    },
+    'The server, while acting as a gateway or proxy, received an invalid response from an upstream server it accessed in attempting to fulfill the request.': {
+        de: 'Der Server, der als Gateway oder Proxy fungiert, hat eine ungültige Antwort von einem vorgelagerten Server erhalten, auf den er beim Versuch, die Anfrage zu erfüllen, zugegriffen hat.'
+    },
+    // 503
+    'Service Unavailable': {
+        de: 'Dienst nicht verfügbar'
+    },
+    'The server is currently unable to handle the request due to temporary overloading or maintenance of the server. It is a temporary condition.': {
+        de: 'Der Server ist derzeit nicht in der Lage, die Anfrage zu bearbeiten, da der Server vorübergehend überlastet ist oder Wartungsarbeiten durchgeführt werden. Dies ist ein vorübergehender Zustand.'
+    },
+    // 504
+    'Gateway Timeout': {
+        de: 'Gateway-Zeitüberschreitung'
+    },
+    'The server, while acting as a gateway or proxy, did not receive a timely response from the upstream server or some other auxiliary server.': {
+        de: 'Der Server, der als Gateway oder Proxy fungiert, hat keine rechtzeitige Antwort vom vorgelagerten Server oder einem anderen Hilfsserver erhalten.'
+    },
+    // 505
+    'HTTP Version Not Supported': {
+        de: 'HTTP-Version wird nicht unterstützt'
+    },
+    'The server does not support, or refuses to support, the major version of HTTP that was used in the request message.': {
+        de: 'Der Server unterstützt die in der Anforderungsnachricht verwendete Hauptversion von HTTP nicht oder weigert sich, sie zu unterstützen.'
+    },
+    // 506
+    'Variant Also Negotiates': {
+        de: 'Variante verhandelt auch'
+    },
+    'The server has an internal configuration error: The chosen variant resource is configured to engage in transparent content negotiation itself, and is therefore not a proper end point in the negotiation process.': {
+        de: 'Der Server hat einen internen Konfigurationsfehler: Die gewählte Variantenressource ist so konfiguriert, dass sie selbst eine transparente Inhaltsaushandlung vornimmt und daher kein geeigneter Endpunkt im Aushandlungsprozess ist.'
+    },
+    // 507
+    'Insufficient Storage': {
+        de: 'Unzureichender Speicherplatz'
+    },
+    'The server is unable to store the representation needed to complete the request. This is typically a result of the server being overloaded or reaching storage limits.': {
+        de: 'Der Server ist nicht in der Lage, die für die Anfrage erforderliche Darstellung zu speichern. Dies ist in der Regel darauf zurückzuführen, dass der Server überlastet ist oder an seine Speichergrenzen stößt.'
+    },
+    // 508
+    'Loop Detected': {
+        de: 'Schleife erkannt'
+    },
+    'The server detected an infinite loop while processing a request.': {
+        de: 'Der Server hat bei der Bearbeitung einer Anfrage eine Endlosschleife festgestellt.'
+    },
+    // 510
+    'Not Extended': {
+        de: 'Nicht erweitert'
+    },
+    'Further extensions to the request are required for the server to fulfill it.': {
+        de: 'Weitere Erweiterungen der Anfrage sind erforderlich, damit der Server sie erfüllen kann.'
+    },
+    // 511
+    'Network Authentication Required': {
+        de: 'Netzwerkauthentifizierung erforderlich'
+    },
+    'The client needs to authenticate to gain network access. Intended for use by intercepting proxies used to control access to the network.': {
+        de: 'Der Client muss sich authentifizieren, um Zugang zum Netzwerk zu erhalten. Vorgesehen für die Verwendung durch abfangende Proxys, die den Zugang zum Netz kontrollieren.'
+    }
+}
+
+const AppTranslation = {
+    'Error': {
+        de: 'Fehler',
+    },
+    'Good luck': {
+        de: 'Viel Glück',
+    },
+    'UH OH': {
+        de: 'Hoppla',
+    },
+    'Request details': {
+        de: 'Details der Anfrage',
+    },
+    'Double-check the URL': {
+        de: 'Überprüfen Sie die URL',
+    },
+    'Alternatively, go back': {
+        de: 'Alternativ gehen Sie zurück',
+    },
+    'Here\'s what might have happened': {
+        de: 'Folgendes könnte passiert sein',
+    },
+    'You may have mistyped the URL': {
+        de: 'Möglicherweise haben Sie die URL falsch eingegeben',
+    },
+    'The site was moved': {
+        de: 'Die Seite wurde verschoben',
+    },
+    'It was never here': {
+        de: 'Es war nie hier',
+    },
+    'Bad Request': {
+        de: 'Fehlerhafte Anfrage',
+    },
+    'The server did not understand the request': {
+        de: 'Der Server hat die Anfrage nicht verstanden',
+    },
+    'Unauthorized': {
+        de: 'Nicht autorisiert',
+    },
+    'The requested page needs a username and a password': {
+        de: 'Die angeforderte Seite benötigt einen Benutzernamen und ein Passwort',
+    },
+    'Forbidden': {
+        de: 'Verboten',
+    },
+    'Access is forbidden to the requested page': {
+        de: 'Der Zugriff auf die angeforderte Seite ist verboten',
+    },
+    'Not Found': {
+        de: 'Nicht gefunden',
+    },
+    'The server can not find the requested page': {
+        de: 'Der Server kann die angeforderte Seite nicht finden',
+    },
+    'Method Not Allowed': {
+        de: 'Methode nicht erlaubt',
+    },
+    'The method specified in the request is not allowed': {
+        de: 'Die in der Anfrage angegebene Methode ist nicht zulässig',
+    },
+    'Proxy Authentication Required': {
+        de: 'Proxy-Authentifizierung benötigt',
+    },
+    'You must authenticate with a proxy server before this request can be served': {
+        de: 'Sie müssen sich bei einem Proxy-Server authentifizieren, bevor diese Anfrage bedient werden kann',
+    },
+    'Request Timeout': {
+        de: 'Zeitüberschreitung der Anforderung',
+    },
+    'The request took longer than the server was prepared to wait': {
+        de: 'Die Anfrage hat länger gedauert, als der Server bereit war zu warten',
+    },
+    'Conflict': {
+        de: 'Konflikt',
+    },
+    'The request could not be completed because of a conflict': {
+        de: 'Die Anfrage konnte aufgrund eines Konflikts nicht abgeschlossen werden',
+    },
+    'Gone': {
+        de: 'Verschwunden',
+    },
+    'The requested page is no longer available': {
+        de: 'Die angeforderte Seite ist nicht mehr verfügbar',
+    },
+    'Length Required': {
+        de: 'Länge benötigt',
+    },
+    'The "Content-Length" is not defined. The server will not accept the request without it': {
+        de: 'Die "Content-Length" ist nicht definiert. Ohne sie akzeptiert der Server die Anfrage nicht',
+    },
+    'Precondition Failed': {
+        de: 'Vorbedingung fehlgeschlagen',
+    },
+    'The pre condition given in the request evaluated to false by the server': {
+        de: 'Die in der Anfrage angegebene Vorbedingung wird vom Server als falsch bewertet',
+    },
+    'Payload Too Large': {
+        de: 'Anfrage zu groß',
+    },
+    'The server will not accept the request, because the request entity is too large': {
+        de: 'Der Server akzeptiert die Anfrage nicht, da die Datenmenge zu groß ist',
+    },
+    'Requested Range Not Satisfiable': {
+        de: 'Anfrage-Bereich nicht erfüllbar',
+    },
+    'The requested byte range is not available and is out of bounds': {
+        de: 'Der angefragte Teilbereich der Ressource existiert nicht oder ist ungültig',
+    },
+    'I\'m a teapot': {
+        de: 'Ich bin eine Teekanne',
+    },
+    'Attempt to brew coffee with a teapot is not supported': {
+        de: 'Der Versuch, Kaffee mit einer Teekanne zuzubereiten, wird nicht unterstützt',
+    },
+    'Too Many Requests': {
+        de: 'Zu viele Anfragen',
+    },
+    'Too many requests in a given amount of time': {
+        de: 'Der Client hat zu viele Anfragen in einem bestimmten Zeitraum gesendet',
+    },
+    'Internal Server Error': {
+        de: 'Interner Server-Fehler',
+    },
+    'The server met an unexpected condition': {
+        de: 'Der Server hat einen internen Fehler festgestellt',
+    },
+    'Bad Gateway': {
+        de: 'Fehlerhaftes Gateway',
+    },
+    'The server received an invalid response from the upstream server': {
+        de: 'Der Server hat eine ungültige Antwort vom Upstream-Server erhalten',
+    },
+    'Service Unavailable': {
+        de: 'Dienst nicht verfügbar',
+    },
+    'The server is temporarily overloading or down': {
+        de: 'Der Server ist vorübergehend überlastet oder ausgefallen',
+    },
+    'Gateway Timeout': {
+        de: 'Gateway Zeitüberschreitung',
+    },
+    'The gateway has timed out': {
+        de: 'Das Zeitlimit für den Verbindungsaufbau mit dem Upstream-Server ist abgelaufen',
+    },
+    'HTTP Version Not Supported': {
+        de: 'HTTP-Version wird nicht unterstützt',
+    },
+    'The server does not support the "http protocol" version': {
+        de: 'Der Server unterstützt die HTTP-Protokoll-Version nicht',
+    },
+
+    'Host': {
+        de: 'Host',
+    },
+    'Original URI': {
+        de: 'Originale URI',
+    },
+    'Time': {
+        de: 'Uhrzeit',
+    },
+    'Timestamp': {
+        de: 'Zeitstempel',
+    },
+
+    'Client-side error': {
+        de: 'Clientseitiger Fehler',
+    },
+    'Server-side error': {
+        de: 'Serverseitiger Fehler',
+    },
+
+    'Your Client': {
+        de: 'Ihr Client',
+    },
+    'Network': {
+        de: 'Netzwerk',
+    },
+    'Web Server': {
+        de: 'Webserver',
+    },
+    'Unknown http status code was sent.': {
+        de: 'Es wurde ein unbekannter HTTP-Statuscode gesendet.',
+    },
+    'What happened?': {
+        de: 'Was ist passiert?',
+    },
+    'What can i do?': {
+        de: 'Was kann ich machen?',
+    },
+    'Please try again in a few minutes.': {
+        de: 'Bitte versuchen Sie es in ein paar Minuten erneut.',
+    },
+    'Working': {
+        de: 'Funktioniert',
+    },
+    'Unknown': {
+        de: 'Unbekannt',
+    },
+    'Please try to change the request method, headers, payload, or URL.': {
+        de: 'Bitte versuchen Sie, die Anfragemethode, Header, Payload oder URL zu ändern.',
+    },
+    'Please check your authorization data.': {
+        de: 'Bitte überprüfen Sie Ihre Zugangsdaten.',
+    },
+    'Please double-check the URL and try again.': {
+        de: 'Bitte überprüfen Sie die URL und versuchen Sie es erneut.',
+    },
+};
+
+const translationData = {
+    ...AppTranslation,
+    ...httpStatusCodeTranslation,
+}
+
+class L10n {
+    constructor() {
+        this.writable = false;
+        this.enumerable = false;
+
+        // Detect browser locale (take only 2 first symbols)
+        this.activeLocale = navigator.language.substring(0, 2).toLowerCase();
+
+        // Normalize the data keys
+        for (const key in translationData) {
+            Object.defineProperty(translationData, this.serializeToken(key), Object.getOwnPropertyDescriptor(translationData, key));
+            delete translationData[key];
+        }
+    }
+
+    serializeToken(token) {
+        return token.toLowerCase().replaceAll(/[^a-z0-9]/g, '');
+    }
+
+    translate(token, defaultValue) {
+        const t = this.serializeToken(token);
+
+        if (this.activeLocale === 'en' && translationData.hasOwnProperty(t)) {
+            return token;
+        }
+
+        if (translationData.hasOwnProperty(t) && translationData[t].hasOwnProperty(this.activeLocale)) {
+            return translationData[t][this.activeLocale];
+        }
+
+        return defaultValue;
+    }
+
+    // Localize all elements with HTML attribute `data-l10n`.
+    localizeDocument() {
+        const dataAttributeName = 'data-l10n';
+
+        for (const element of document.querySelectorAll('[' + dataAttributeName + ']')) {
+            const attr = element.getAttribute(dataAttributeName).trim();
+            const token = attr.length > 0 ? attr : element.innerText.trim();
+            const localized = this.translate(token, undefined);
+
+            if (attr.length === 0) {
+                element.setAttribute(dataAttributeName, token);
+            }
+
+            if (localized !== undefined) {
+                element.innerText = localized;
+            } else {
+                console.debug(`Unsupported l10n token detected: "${token}" (locale "${this.activeLocale}")`, element);
+            }
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const l10n = new L10n;
+    new ErrorPage('{{ code }}', l10n);
+    l10n.localizeDocument();
+});
+</script>
+</body></html>
