@@ -1,16 +1,15 @@
 services:
-  web:
-    image: webdevops/php-apache:8.3
+  roundcube:
+    image: roundcube/roundcubemail:latest
+    #container_name: roundcube
     restart: always
     volumes:
-      - ./.docker/roundmail:/app
-    environment:
-      - WEB_DOCUMENT_ROOT=/app
-      - APPLICATION_UID=${APPLICATION_UID:-501}
-      - APPLICATION_GID=${APPLICATION_GID:-80}
+      - ./.docker/roundmail/html:/var/www/html
+      - ./.docker/roundmail/config:/var/roundcube/config
     labels:
       - traefik.enable=true
       - traefik.http.routers.mail_www.rule=(Host(`mail.org`) || Host(`www.mail.org`) || Host(`mail.mail.org`) || Host(`pop.mail.org`) || Host(`imap.mail.org`) || Host(`smtp.mail.org`))
+      - traefik.http.services.mail_www.loadbalancer.server.port=80
       - traefik.http.routers.mail_www.middlewares=mail_redirect,redirect-www@file
 
       # TLS
@@ -22,15 +21,6 @@ services:
       - "traefik.http.middlewares.mail_redirect.redirectregex.regex=^(https?)://(mail|pop|imap|smtp)\\.mail\\.org/(.*)"
       - "traefik.http.middlewares.mail_redirect.redirectregex.replacement=https://mail.org"
       - "traefik.http.middlewares.mail_redirect.redirectregex.permanent=true"
-    working_dir: /app
-
-  roundcube:
-    build: ./build-roundcubemail
-    #image: roundcube/roundcubemail:latest
-    #container_name: roundcube
-    restart: always
-    volumes:
-      - ./.docker/roundmail:/var/www/html
     environment:
       - ROUNDCUBEMAIL_DB_TYPE=mysql
       - ROUNDCUBEMAIL_DB_HOST=global-db
@@ -45,6 +35,7 @@ services:
       # Internal: https://github.com/roundcube/roundcubemail/tree/master/plugins
       # External see Dockerfile: https://plugins.roundcube.net/
       - ROUNDCUBEMAIL_PLUGINS=archive,carddav,managesieve,markasjunk,newmail_notifier,zipdownload
+      - ROUNDCUBEMAIL_COMPOSER_PLUGINS=roundcube/carddav
 
   mail:
     image: docker.io/mailserver/docker-mailserver:latest
@@ -63,9 +54,8 @@ services:
       - "0.0.0.0:995:995"
       - "0.0.0.0:993:993"
       - "0.0.0.0:465:465"
-       # Manage Sieve port
-      - "0.0.0.0:4190:4190"
 
+      - "0.0.0.0:4190:4190" # Manage Sieve port
       - "127.0.0.1:11334:11334" # Rspamd web interface
     volumes:
       - ./.docker/mail/config:/tmp/docker-mailserver

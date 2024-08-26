@@ -1,6 +1,6 @@
 # Reverse DNS
 
-If you want a mail server, you must set a reverse DNS.
+If you want a mail server, you must set a reverse DNS (rDNS).
 
 Generic domain names (host123456789.example.org) are bad! Best practise is to use a toplevel domain (example.org), which you never change.
 
@@ -8,8 +8,8 @@ Generic domain names (host123456789.example.org) are bad! Best practise is to us
 
 Configure reserve dns on your hoster:
 
-* **Netcup** Server-Login > Choose Server > Network > IPv4 (rDNS) = example.org
-* **Strato** Server-Login > Domains > DNS-Reverse > FQDN (Fully Qualified Domain Name) = example.org
+* **Netcup** Server-Login > Choose Server > Network > IPv4 (rDNS) = mail.example.org
+* **Strato** Server-Login > Domains > DNS-Reverse > FQDN (Fully Qualified Domain Name) = mail.example.org
 
 Set hostname on your server:
 
@@ -25,6 +25,10 @@ Add 'example.org' in file 'hosts':
 ```
 
 ## Test reverse dns
+
+Online tests:
+
+* [MxToolbox: SuperTool](https://mxtoolbox.com/SuperTool.aspx) > Test Email Server
 
 *Note: If your mail is not ready set up, do this later.*
 
@@ -42,11 +46,11 @@ dig +noall +answer mail.server.com A
 # mail.server.com.  3600  IN  A  123.3.2.1
 ```
 
-Get reverse dns (PTR) from IP:
+Get Pointer Record (PTR) from IP:
 
 ```bash
 dig +noall +answer -x 123.3.2.1
-# 1.2.3.123.in-addr.arpa. 1800 IN	PTR	server.com.
+# 1.2.3.123.in-addr.arpa. 1800 IN  PTR  server.com.
 ```
 
 Check PTR from arpa:
@@ -56,12 +60,19 @@ dig +short 1.2.3.123.in-addr.arpa PTR
 # server.com.
 ```
 
-Test Mail Server if PTR & HELO is the same:
+Check if mail server responds (Status 220) with the same url like PTR:
 
 ```bash
-telnet smtp.server.com 25
-# 220 server.com ESMTP
-HELO example.org
-# 250 server.com
+telnet smtp.cyb21.de 25
+# 220 mail.server.com ESMTP
+
+# For new servers with ESMTP (Extended Simple Message Transfer Protocol)
+EHLO example.org
+# 250 mail.server.com
+
+# For old servers with SMTP (Simple Message Transfer Protocol)
+#HELO example.org
+# 250 mail.server.com
+
 QUIT
 ```
