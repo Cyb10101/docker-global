@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+scriptPath="$(cd "$(dirname "${0}")" >/dev/null 2>&1; pwd -P)"
+cd "${scriptPath}"
 
 replaceMarker() {
     REPLACE="${1}"

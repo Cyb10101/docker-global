@@ -78,7 +78,11 @@ certificatesResolvers:
       email: "username@example.org"
 ```
 
-If you want to change the "Traefik erorr status page" take a look into `traefik/status-pages` and run `create.sh` to generate a page. One index.html file should be enough.
+Add or generate a "Traefik erorr status page". One index.html file should be enough.
+
+```bash
+./traefik/status-pages/create.sh
+```
 
 ## Database
 
