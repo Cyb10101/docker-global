@@ -41,7 +41,7 @@ SELECT User, Host FROM mysql.user;
 /* Show grants */
 SHOW GRANTS FOR 'username'@'%';
 
-/* Get drop username sql */
+/* Get drop sql */
 SELECT CONCAT("DROP DATABASE `", db, "`; DROP USER '", user, "'", "@", "'", HOST, "'; FLUSH PRIVILEGES;") AS `SQL` FROM mysql.db WHERE `Db` IN ('website_www');
 
 /* Drop database and user */
