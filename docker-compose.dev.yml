@@ -27,7 +27,7 @@ services:
       - ./.docker/traefik/acme/:/etc/traefik/acme/
       - ./.docker/traefik/certs/:/etc/traefik/certs/
     healthcheck:
-      test: 
+      test:
         - CMD
         - traefik
         - healthcheck
