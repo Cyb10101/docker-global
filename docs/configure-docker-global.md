@@ -66,7 +66,7 @@ If you use the trafik web interface, generate a password with htpasswd and set i
 
 ```bash
 # htpasswd -nb admin "password" | sed -e s/\\$/\\$\\$/g
-docker run --rm httpd:2.4-alpine htpasswd -nbB admin "password" | sed -e s/\\$/\\$\\$/g
+docker run --rm httpd:2.4-alpine htpasswd -nbB admin 'password' | sed -e 's/\\$/\\$\\$/g'
 ```
 
 Configure mail for Let's Encrypt in 'traefik/traefik.yaml':
