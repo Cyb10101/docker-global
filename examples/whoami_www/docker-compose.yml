@@ -6,7 +6,7 @@ services:
       - traefik.enable=true
       #- "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
       - traefik.http.routers.whoami.rule=Host(`whoami.localhost`) || Host(`www.whoami.localhost`)
-      #- traefik.http.routers.whoami.rule=Host(`whoami.localhost`) || HostRegexp(`{subdomain:.+}.whoami.localhost`) || Host(`192.168.178.21`)
+      #- traefik.http.routers.whoami.rule=Host(`whoami.localhost`) || HostRegexp(`.+\.whoami\.localhost`) || Host(`192.168.178.21`)
       #- traefik.http.services.whoami.loadbalancer.server.port=8080
       - traefik.http.routers.whoami.middlewares=redirect-www@file
       #- traefik.http.routers.whoami.middlewares=whoami-alternative_www,redirect-www@file
