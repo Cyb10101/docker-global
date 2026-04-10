@@ -67,11 +67,11 @@ startFunction() {
             fi
         ;;
         down)
-            startFunction stopOther
+            #startFunction stopOther
             dockerComposeCmd down --remove-orphans
         ;;
         stop)
-            startFunction stopOther
+            #startFunction stopOther
             dockerComposeCmd stop --remove-orphans
         ;;
         mysql)
