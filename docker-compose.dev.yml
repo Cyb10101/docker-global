@@ -46,7 +46,7 @@ services:
       - ./traefik/status-pages/public:/usr/local/apache2/htdocs
     labels:
       - traefik.enable=true
-      - traefik.http.routers.status-pages.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.status-pages.rule=HostRegexp(`.+`)
       - traefik.http.routers.status-pages.priority=1
       #- traefik.http.routers.status-pages.entrypoints=web
       - traefik.http.routers.status-pages.middlewares=status-pages@file
