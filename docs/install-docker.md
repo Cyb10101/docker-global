@@ -19,7 +19,7 @@ Install Docker Compose:
 
 ```bash
 sudo apt -y install jq
-VERSION=$(curl -fsSL https://api.github.com/repos/docker/compose/releases/latest | jq -r '.name')
+VERSION=$(curl -fsSL https://api.github.com/repos/docker/compose/releases/latest | jq -r '.name'); echo $VERSION
 curl --progress-bar -o /tmp/docker-compose -fL "https://github.com/docker/compose/releases/download/${VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 sudo install /tmp/docker-compose /usr/local/bin/docker-compose
 ```
