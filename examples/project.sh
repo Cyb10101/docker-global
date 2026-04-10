@@ -30,10 +30,9 @@ getDirectories() {
   directories=(
     global
     mail
-    nextcloud
 
     $(ls -d */ | sed 's/\/$//' | grep -E '^\.\/user_.*$' | sort)
-    $(ls -d */ | sed 's/\/$//' | grep -Ev '^\.\/(global|mail|nextcloud|user_.*)$' | sort)
+    $(ls -d */ | sed 's/\/$//' | grep -Ev '^\.\/(global|mail|user_.*)$' | sort)
   )
   echo "${directories[@]}"
 }
@@ -49,7 +48,7 @@ eachDirectory() {
       eval ${command}
       cd ..
     else
-      textColor 1 "# Error: Directory '${directory}' not found!"
+      textColor 3 "# Warning: Directory '${directory}' not found!"
     fi
     done
 }
