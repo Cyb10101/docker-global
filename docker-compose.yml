@@ -5,9 +5,9 @@ services:
     restart: ${RESTART:-always}
     labels:
       # If you want to use traefik interface over a domain, enable it
-      - traefik.enable=false
-      - traefik.http.routers.global-traefik.rule=Host(`traefik.localhost`)
-      - traefik.http.services.global-traefik.loadbalancer.server.port=8080
+      #- traefik.enable=false
+      #- traefik.http.routers.global-traefik.rule=Host(`traefik.localhost`)
+      #- traefik.http.services.global-traefik.loadbalancer.server.port=8080
 
       # TLS
       - traefik.http.routers.global-traefik.entrypoints=websecure
@@ -21,6 +21,7 @@ services:
     ports:
       - "${HTTP_IP:-0.0.0.0}:${HTTP_PORT:-80}:80"
       - "${HTTPS_IP:-0.0.0.0}:${HTTPS_PORT:-443}:443"
+      - "127.0.0.1:8080:8080" # Web interface ( http://127.0.0.1:8080 ) ssh -L 127.0.0.1:8080:127.0.0.1:8080 server
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro
