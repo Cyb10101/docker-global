@@ -1,7 +1,7 @@
 services:
   # https://doc.traefik.io/traefik/
   global-traefik:
-    image: traefik:v2.10
+    image: traefik:v3.6
     restart: ${RESTART:-unless-stopped}
     labels:
       # If you want to use traefik interface over a domain, enable it

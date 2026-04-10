@@ -8,7 +8,7 @@ services:
       - ./.docker/roundmail/config:/var/roundcube/config
     labels:
       - traefik.enable=true
-      - traefik.http.routers.mail_www.rule=(Host(`mail.org`) || Host(`www.mail.org`) || Host(`mail.mail.org`) || Host(`pop.mail.org`) || Host(`imap.mail.org`) || Host(`smtp.mail.org`))
+      - traefik.http.routers.mail_www.rule=Host(`mail.org`) || Host(`www.mail.org`) || Host(`mail.mail.org`) || Host(`pop.mail.org`) || Host(`imap.mail.org`) || Host(`smtp.mail.org`)
       - traefik.http.services.mail_www.loadbalancer.server.port=80
       - traefik.http.routers.mail_www.middlewares=mail_redirect,redirect-www@file
 
@@ -141,7 +141,7 @@ services:
       - SMTP_SOCKET=SSL
     labels:
       - traefik.enable=true
-      - traefik.http.routers.mail_autoconfig.rule=(Host(`autoconfig.mail.org`) || Host(`autodiscover.mail.org`) || Host(`autoconfig.example.org`) || Host(`autodiscover.example.org`))
+      - traefik.http.routers.mail_autoconfig.rule=Host(`autoconfig.mail.org`) || Host(`autodiscover.mail.org`) || Host(`autoconfig.example.org`) || Host(`autodiscover.example.org`)
 
       # TLS
       - traefik.http.routers.mail_autoconfig.entrypoints=websecure
