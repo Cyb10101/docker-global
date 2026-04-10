@@ -74,6 +74,16 @@ startFunction() {
             #startFunction stopOther
             dockerComposeCmd stop --remove-orphans
         ;;
+        mariadb)
+            # ./start.sh mysql databaseName < ~/Downloads/import.sql
+            dockerComposeCmd exec -T global-db bash -c 'mariadb -p${MARIADB_ROOT_PASSWORD} "$@"' dummy "${@:2}"
+            echo "${@:2}"
+        ;;
+        mariadb-dump)
+            # ./start.sh mysqldump databaseName > ~/Downloads/export.sql
+            dockerComposeCmd exec -T global-db bash -c 'mariadb-dump -p${MARIADB_ROOT_PASSWORD} "$@"' dummy "${@:2}"
+            echo "${@:2}"
+        ;;
         mysql)
             # ./start.sh mysql databaseName < ~/Downloads/import.sql
             dockerComposeCmd exec -T global-db bash -c 'mysql -p${MARIADB_ROOT_PASSWORD} "$@"' dummy "${@:2}"
