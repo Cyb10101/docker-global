@@ -31,8 +31,8 @@ getDirectories() {
     global
     mail
 
-    $(ls -d */ | sed 's/\/$//' | grep -E '^\.\/user_.*$' | sort)
-    $(ls -d */ | sed 's/\/$//' | grep -Ev '^\.\/(global|mail|user_.*)$' | sort)
+    $(ls -d */ | sed 's/\/$//' | grep -E '^user_.*$' | sort)
+    $(ls -d */ | sed 's/\/$//' | grep -Ev '^(global|mail|user_.*)$' | sort)
   )
   echo "${directories[@]}"
 }
